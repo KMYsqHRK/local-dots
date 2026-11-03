@@ -40,6 +40,7 @@ class TempApp(unittest.TestCase):
         shutil.copytree(REPO / "dots" / "param-sweep-demo", self.tmp / "dots" / "param-sweep-demo")
         self.app = AppConfig(root=self.tmp, backend=BackendConfig(), dots_dir=self.tmp / "dots", state_dir=self.tmp / "state")
         self.dot = load_dot(self.tmp / "dots" / "param-sweep-demo")
+        self.dot.enabled = True  # リポジトリでは定期実行を切ってあるサンプル
         self.inbox = Inbox(self.app.state_dir)
 
     def tearDown(self):

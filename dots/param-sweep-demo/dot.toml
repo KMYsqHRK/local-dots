@@ -1,5 +1,6 @@
 description = "2変数の目的関数を、少ない評価回数で最小化するパラメータスタディのサンプル"
-enabled = true
+# サンプルなので、定期実行はしない(python -m localdots run param-sweep-demo では動く)
+enabled = false
 
 [schedule]
 every = "30m"
