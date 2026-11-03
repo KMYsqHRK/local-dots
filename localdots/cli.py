@@ -7,6 +7,7 @@ import sys
 import time
 from pathlib import Path
 
+from . import dotenv
 from .backend import BackendError
 from .config import ConfigError, load_app, load_dots
 from .inbox import Inbox
@@ -197,6 +198,7 @@ def main(argv: list[str] | None = None) -> int:
     }
     try:
         app = load_app(args.root or _find_root(Path.cwd()))
+        dotenv.load(app.root / ".env")  # メールのパスワードや API キー(git に入れない)
         dots = load_dots(app)
         return commands[args.command](app, dots, args)
     except (ConfigError, BackendError, RuntimeError) as e:

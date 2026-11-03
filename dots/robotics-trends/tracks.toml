@@ -1,0 +1,454 @@
+# 曜日ごとの分野(track)と、その中で読み進める順番(step)。
+# 1回(1晩)で1 step 進む。翌週の同じ曜日は、その続きの step から始まる。
+#
+#   aim   … その step で掴みたいこと(朝のメールに出る)
+#   query … Semantic Scholar の bulk search(| は OR、+ は AND、"..." は語句)
+#   part  … 1つの step で複数のテーマを読むときは、query と year を [[track.step.part]] に分けて書く(本数は等分)
+#   year  … 何年以降の論文を読むか。基礎の step は古い定番から読む
+#   arxiv … その分野の arXiv 新着を拾う検索式(track ごと)
+#   folder … レポートを置くフォルダー名(robotics-digest の report_dir の下)
+#   week  … "odd" / "even" を付けた分野は隔週(ISO 週番号の奇数週 / 偶数週)。同じ曜日に2つの分野を交互に置ける
+#   weekday を書かない分野はお休み(読まない)
+
+[[track]]
+key = "navigation"
+folder = "1_ナビゲーション"
+label = "ナビゲーション"
+weekday = "mon"
+arxiv = 'cat:cs.RO AND (abs:navigation OR abs:"path planning" OR abs:"motion planning")'
+
+  [[track.step]]
+  key = "sampling-planning"
+  label = "経路計画の基礎(グラフ探索とサンプリング)"
+  aim = "A*・PRM・RRT・RRT* が何を解いていて、なぜ今も使われるのか"
+  query = '("path planning" | "motion planning") + (RRT | "probabilistic roadmap" | "sampling-based" | "A*")'
+  year = "1995-"
+
+  [[track.step]]
+  key = "local-planning"
+  label = "局所計画と障害物回避"
+  aim = "DWA・TEB・MPC など、動きながら避ける仕組みの系譜"
+  query = '("local planner" | "dynamic window" | "obstacle avoidance" | "model predictive control") + ("mobile robot" | navigation)'
+  year = "1995-"
+
+  [[track.step]]
+  key = "trajectory-optimization"
+  label = "最適化ベースの軌道計画"
+  aim = "CHOMP・TrajOpt から、軌道を最適化問題として解く考え方"
+  query = '("trajectory optimization" | CHOMP | TrajOpt | "optimization-based planning") + (robot | manipulator | motion)'
+  year = "2009-"
+
+  [[track.step]]
+  key = "learned-navigation"
+  label = "学習ベースのナビゲーション"
+  aim = "強化学習・end-to-end でナビゲーションを学ばせる流れと、その限界"
+  query = '("reinforcement learning" | "end-to-end" | "imitation learning") + ("robot navigation" | "visual navigation" | "mobile robot")'
+  year = "2016-"
+
+  [[track.step]]
+  key = "semantic-navigation"
+  label = "意味的ナビゲーション(ObjectNav・VLN)"
+  aim = "「台所に行って」のように、意味で行き先を決めるナビゲーション"
+  query = '("object goal navigation" | "vision-and-language navigation" | "semantic navigation" | "ObjectNav")'
+  year = "2018-"
+
+  [[track.step]]
+  key = "social-navigation"
+  label = "人のいる環境でのナビゲーション"
+  aim = "群衆の中を、人に迷惑をかけずに進むための研究"
+  query = '("social navigation" | "crowd navigation" | "human-aware navigation" | "socially aware")'
+  year = "2015-"
+
+  [[track.step]]
+  key = "navigation-foundation"
+  label = "基盤モデル時代のナビゲーション"
+  aim = "GNM・ViNT・NoMaD・LLM/VLM を使ったナビゲーションで何が変わったか"
+  query = '("navigation foundation model" | "general navigation model" | ViNT | NoMaD | ("large language model" + navigation) | ("vision-language model" + navigation))'
+  year = "2022-"
+
+[[track]]
+key = "recognition"
+folder = "2_認識"
+label = "認識(リコグニション)"
+weekday = "tue"
+arxiv = 'cat:cs.RO AND (abs:detection OR abs:segmentation OR abs:recognition OR abs:perception)'
+
+  [[track.step]]
+  key = "deep-detection"
+  label = "深層学習による物体検出の基礎"
+  aim = "R-CNN 系・YOLO 系・DETR で、検出がどう速く正確になってきたか"
+  query = '("object detection" | "object detector") + (convolutional | "deep" | transformer | real-time)'
+  year = "2013-"
+
+  [[track.step]]
+  key = "segmentation"
+  label = "セグメンテーション"
+  aim = "FCN・Mask R-CNN・DeepLab から Segment Anything まで"
+  query = '("semantic segmentation" | "instance segmentation" | "panoptic segmentation" | "segment anything")'
+  year = "2014-"
+
+  [[track.step]]
+  key = "point-cloud"
+  label = "3D点群の認識"
+  aim = "PointNet 以降、点群をどう深層学習で扱ってきたか"
+  query = '("point cloud" | "3D object detection" | LiDAR) + (classification | segmentation | detection | "deep learning")'
+  year = "2016-"
+
+  [[track.step]]
+  key = "pose-grasp"
+  label = "物体の6D姿勢推定と把持検出"
+  aim = "ロボットが「どこをどう掴むか」を見て決めるための認識"
+  query = '("6D pose estimation" | "6-DoF pose" | "object pose estimation" | "grasp detection" | "grasp pose")'
+  year = "2016-"
+
+  [[track.step]]
+  key = "representation"
+  label = "自己教師あり学習と視覚表現"
+  aim = "CLIP・DINO・MAE、そしてロボット向けの表現(R3M など)"
+  query = '("self-supervised" | "contrastive learning" | "visual representation" | "masked autoencoder") + (visual | image | robot | manipulation)'
+  year = "2019-"
+
+  [[track.step]]
+  key = "open-vocabulary"
+  label = "オープン語彙の認識と基盤モデル"
+  aim = "言葉で何でも探せる検出・セグメンテーション(OWL-ViT・Grounding DINO など)"
+  query = '("open-vocabulary" | "open-world" | "zero-shot") + ("object detection" | segmentation | grounding)'
+  year = "2021-"
+
+  [[track.step]]
+  key = "robot-perception"
+  label = "ロボットのための認識(アフォーダンス・シーングラフ)"
+  aim = "「何があるか」から「何ができるか」へ"
+  query = '(affordance | "scene graph" | "object-centric") + (robot | manipulation | embodied)'
+  year = "2018-"
+
+[[track]]
+key = "slam"
+folder = "3_SLAM・自己位置推定・フィルタリング"
+label = "SLAM・自己位置推定・フィルタリング"
+weekday = "wed"
+arxiv = 'cat:cs.RO AND (abs:SLAM OR abs:localization OR abs:odometry OR abs:"state estimation")'
+
+  [[track.step]]
+  key = "probabilistic-filtering"
+  label = "確率的状態推定の基礎(カルマン・パーティクル)"
+  aim = "KF・EKF・UKF・パーティクルフィルタ・MCL が何を仮定しているか"
+  query = '("Kalman filter" | "particle filter" | "Monte Carlo localization" | "unscented") + (robot | localization | tracking | estimation)'
+  year = "1995-"
+
+  [[track.step]]
+  key = "classic-slam"
+  label = "古典的SLAM"
+  aim = "EKF-SLAM・FastSLAM・GraphSLAM で、SLAM 問題がどう定式化されたか"
+  query = '("simultaneous localization and mapping" | SLAM) + (EKF | FastSLAM | "graph-based" | "pose graph" | probabilistic)'
+  year = "1999-"
+
+  [[track.step]]
+  key = "visual-slam"
+  label = "視覚SLAMとビジュアルオドメトリ"
+  aim = "PTAM・ORB-SLAM・LSD-SLAM・DSO、特徴点法と直接法"
+  query = '("visual SLAM" | "visual odometry" | "monocular SLAM" | "ORB-SLAM" | "direct sparse")'
+  year = "2007-"
+
+  [[track.step]]
+  key = "visual-inertial"
+  label = "視覚慣性オドメトリとセンサフュージョン"
+  aim = "MSCKF・OKVIS・VINS-Mono で、カメラと IMU をどう組み合わせるか"
+  query = '("visual-inertial" | "inertial odometry" | "sensor fusion" | MSCKF) + (odometry | SLAM | estimation | navigation)'
+  year = "2007-"
+
+  [[track.step]]
+  key = "lidar-slam"
+  label = "LiDAR SLAM"
+  aim = "LOAM・LeGO-LOAM・LIO-SAM・FAST-LIO の系譜"
+  query = '("lidar odometry" | "LiDAR SLAM" | "laser odometry" | "lidar-inertial" | LOAM)'
+  year = "2014-"
+
+  [[track.step]]
+  key = "backend-optimization"
+  label = "因子グラフと最適化バックエンド"
+  aim = "g2o・iSAM・GTSAM、ループ閉じ込みとバンドル調整"
+  query = '("factor graph" | "pose graph optimization" | "bundle adjustment" | "loop closure" | iSAM | g2o)'
+  year = "2008-"
+
+  [[track.step]]
+  key = "place-recognition"
+  label = "場所認識と長期運用"
+  aim = "同じ場所に戻ったと気づく仕組み(DBoW・NetVLAD など)と、季節や昼夜の変化"
+  query = '("place recognition" | "loop closure detection" | "long-term localization" | "visual localization" | NetVLAD)'
+  year = "2010-"
+
+  [[track.step]]
+  key = "neural-slam"
+  label = "学習とニューラル表現のSLAM"
+  aim = "DROID-SLAM、NeRF・Gaussian Splatting を使った SLAM"
+  query = '("neural implicit" | NeRF | "gaussian splatting" | "deep visual" | "learning-based" | DROID) + (SLAM | odometry | localization | mapping)'
+  year = "2018-"
+
+[[track]]
+key = "sensors-hardware"
+folder = "4_センサー・ハードウェア"
+label = "センサー・ハードウェア"
+weekday = "thu"
+# ハードと、それを測るセンサーを1回にまとめて読む(1回の本数をテーマごとに分け合うので、他の曜日と同じ8段階で終わる)
+arxiv = 'cat:cs.RO AND (abs:sensor OR abs:calibration OR abs:tactile OR abs:IMU OR abs:actuator OR abs:mechanism OR abs:gripper OR abs:hardware)'
+
+  [[track.step]]
+  key = "joints-actuators"
+  label = "関節とアクチュエータ"
+  aim = "モータ・減速機・柔軟関節・準直接駆動で、ロボットの関節をどう作るか"
+
+    [[track.step.part]]
+    # アクチュエータの基礎
+    query = '(actuator | "electric motor" | "gear reducer" | "harmonic drive" | backdrivable | backdrivability) + (robot | joint | manipulator)'
+    year = "2000-"
+
+    [[track.step.part]]
+    # 柔軟関節と準直接駆動
+    query = '("series elastic actuator" | "quasi-direct drive" | "proprioceptive actuator" | "variable stiffness actuator" | "compliant actuator")'
+    year = "1995-"
+
+  [[track.step]]
+  key = "body-sensing"
+  label = "体の状態を測る(力覚・トルク・IMU)"
+  aim = "力センサ・関節トルク・慣性計測で、自分の体の状態をどう知るか"
+
+    [[track.step.part]]
+    # 力覚・トルク・固有受容
+    query = '("force/torque sensor" | "force sensing" | "joint torque" | proprioception | "force estimation") + (robot | manipulator | legged)'
+    year = "2005-"
+
+    [[track.step.part]]
+    # IMU と慣性計測
+    query = '(IMU | "inertial measurement unit" | preintegration | gyroscope | accelerometer) + (robot | navigation | estimation | calibration)'
+    year = "2005-"
+
+  [[track.step]]
+  key = "legged-humanoid-hardware"
+  label = "脚とヒューマノイドの機構"
+  aim = "走れる脚と全身のヒューマノイドを、どう設計してきたか"
+
+    [[track.step.part]]
+    # 脚ロボットの機構
+    query = '("legged robot" | quadruped | biped) + (design | hardware | mechanism | actuator | leg)'
+    year = "2005-"
+
+    [[track.step.part]]
+    # ヒューマノイドのハードウェア
+    query = 'humanoid + (design | hardware | actuator | platform | mechanism)'
+    year = "2005-"
+
+  [[track.step]]
+  key = "cameras"
+  label = "カメラ(キャリブレーション・深度・ステレオ)"
+  aim = "カメラのモデルと較正、深度カメラとステレオで3Dを測る"
+
+    [[track.step.part]]
+    # カメラモデルとキャリブレーション
+    query = '("camera calibration" | "extrinsic calibration" | "intrinsic calibration" | "hand-eye calibration" | "camera-IMU")'
+    year = "1998-"
+
+    [[track.step.part]]
+    # 深度カメラとステレオ
+    query = '("RGB-D" | "depth camera" | "stereo matching" | "time-of-flight" | "depth estimation" | KinectFusion)'
+    year = "2010-"
+
+  [[track.step]]
+  key = "hands-touch"
+  label = "手(ハンド・グリッパと触覚)"
+  aim = "掴むための機構と、触って分かるためのセンサ"
+
+    [[track.step.part]]
+    # ロボットハンドとグリッパ
+    query = '("robot hand" | "robotic hand" | gripper | "underactuated hand" | "end effector") + (design | mechanism | grasping)'
+    year = "2005-"
+
+    [[track.step.part]]
+    # 触覚センサ
+    query = '("tactile sensor" | "tactile sensing" | GelSight | "vision-based tactile" | "electronic skin")'
+    year = "2012-"
+
+  [[track.step]]
+  key = "range-sensing"
+  label = "測距センサ(LiDAR とレーダー)"
+  aim = "LiDAR とレーダーで距離を測る原理と、ロボットでの使い分け"
+
+    [[track.step.part]]
+    # LiDAR と測距センサ
+    query = '(lidar | "laser scanner" | "range sensor" | "laser range finder") + (robot | perception | calibration | mapping)'
+    year = "2005-"
+
+    [[track.step.part]]
+    # レーダーと新しいセンサ
+    query = '(radar | mmWave | "4D radar" | "millimeter-wave") + (robot | odometry | perception | SLAM | localization)'
+    year = "2015-"
+
+  [[track.step]]
+  key = "soft-lowcost"
+  label = "ソフトロボットと低コスト・オープンなハード"
+  aim = "柔らかくて安全なロボットと、安く作ってデータを集める流れ"
+
+    [[track.step.part]]
+    # ソフトロボティクス
+    query = '("soft robot" | "soft robotics" | "soft actuator" | "pneumatic actuator" | "soft gripper")'
+    year = "2010-"
+
+    [[track.step.part]]
+    # 低コスト・オープンなハードウェア
+    query = '("low-cost" | "open-source" | affordable | inexpensive) + (robot | "robot arm" | hardware | manipulator | platform)'
+    year = "2015-"
+
+  [[track.step]]
+  key = "fast-robots"
+  label = "速く動くロボット(ドローンとイベントカメラ)"
+  aim = "空を飛ぶロボットの機体と制御、速い動きを捉えるイベントカメラ"
+
+    [[track.step.part]]
+    # 空を飛ぶロボット
+    query = '(quadrotor | multirotor | "aerial robot" | "aerial manipulation" | UAV | drone) + (design | control | hardware | manipulation)'
+    year = "2010-"
+
+    [[track.step.part]]
+    # イベントカメラ
+    query = '("event camera" | "event-based vision" | "dynamic vision sensor" | "neuromorphic vision")'
+    year = "2014-"
+
+[[track]]
+key = "simulation"
+folder = "5_シミュレーション"
+label = "シミュレーション"
+weekday = "fri"
+arxiv = 'cat:cs.RO AND (abs:simulation OR abs:simulator OR abs:"sim-to-real" OR abs:"digital twin")'
+
+  [[track.step]]
+  key = "physics-engines"
+  label = "物理シミュレータの基礎"
+  aim = "MuJoCo・Bullet・Gazebo など、ロボット用シミュレータが何を計算しているか"
+  query = '(MuJoCo | Gazebo | PyBullet | Bullet | "physics engine" | "physics simulator" | "robot simulator") + (robot | simulation | control)'
+  year = "2004-"
+
+  [[track.step]]
+  key = "contact-modeling"
+  label = "接触と摩擦のモデリング"
+  aim = "ぶつかる・滑る・掴むを、シミュレーションでどう近似するか"
+  query = '("contact model" | "contact dynamics" | "rigid body dynamics" | "frictional contact" | "complementarity") + (simulation | simulator | robot)'
+  year = "2000-"
+
+  [[track.step]]
+  key = "gpu-simulation"
+  label = "GPU による大規模並列シミュレーション"
+  aim = "Isaac Gym・Brax・MJX で、強化学習の速さがどう変わったか"
+  query = '("Isaac Gym" | "Isaac Sim" | "GPU-accelerated" | "massively parallel" | Brax | "MuJoCo XLA" | Genesis) + (simulation | "reinforcement learning" | robot)'
+  year = "2019-"
+
+  [[track.step]]
+  key = "sim-to-real"
+  label = "sim-to-real とドメインランダム化"
+  aim = "シミュレーションと現実の差(reality gap)をどう埋めるか"
+  query = '("sim-to-real" | "sim2real" | "domain randomization" | "reality gap" | "system identification") + (robot | policy | transfer)'
+  year = "2016-"
+
+  [[track.step]]
+  key = "differentiable-simulation"
+  label = "微分可能シミュレーション"
+  aim = "勾配が取れるシミュレータで、制御や設計を最適化する"
+  query = '("differentiable simulation" | "differentiable physics" | "differentiable simulator" | "differentiable rendering") + (robot | control | manipulation)'
+  year = "2018-"
+
+  [[track.step]]
+  key = "deformable-simulation"
+  label = "柔軟物・布・流体のシミュレーション"
+  aim = "布や紐、柔らかい物の操作を、シミュレーションでどう扱うか"
+  query = '(deformable | cloth | "soft body" | fluid | rope) + (simulation | simulator) + (robot | manipulation)'
+  year = "2015-"
+
+  [[track.step]]
+  key = "learning-environments"
+  label = "ロボット学習の環境とベンチマーク"
+  aim = "robosuite・RLBench・ManiSkill・Habitat・LIBERO など、比べるための土俵"
+  query = '(benchmark | environment | suite) + (simulation | simulated) + (manipulation | embodied | "robot learning")'
+  year = "2018-"
+
+  [[track.step]]
+  key = "real2sim"
+  label = "Real2Sim と生成的シミュレーション"
+  aim = "現実をスキャンしてシミュレーションを作る、生成モデルで環境を作る"
+  query = '("real-to-sim" | real2sim | "digital twin" | "generative simulation" | "procedural generation" | "scene generation") + (robot | simulation | manipulation)'
+  year = "2020-"
+
+[[track]]
+key = "trends"
+folder = "9_2020年代の潮流"
+label = "2020年代の潮流"
+# 今は曜日に割り当てていない(お休み中)。weekday を書けばまた読み進める。これまでの記録は残っている
+arxiv = "cat:cs.RO"
+
+  [[track.step]]
+  key = "llm-planning"
+  label = "LLMによるタスク計画"
+  aim = "LLM がロボットの「頭脳」になるまで"
+  query = '("large language model" | "language model" | LLM) + (robot | robotic | embodied) + (planning | planner | "code as policies")'
+  year = "2020-"
+
+  [[track.step]]
+  key = "vla"
+  label = "VLA・ロボット基盤モデル"
+  aim = "RT-2・OpenVLA・π0 など、見て・聞いて・動く一つのモデル"
+  query = '("vision-language-action" | "robot foundation model" | "generalist robot policy" | "robotics transformer")'
+  year = "2020-"
+
+  [[track.step]]
+  key = "imitation-teleop"
+  label = "模倣学習とテレオペによるデータ収集"
+  aim = "ALOHA など、人が操作したデータから学ぶ流れ"
+  query = '("imitation learning" | "behavior cloning" | teleoperation) + (robot | robotic | manipulation | bimanual)'
+  year = "2020-"
+
+  [[track.step]]
+  key = "diffusion-policy"
+  label = "拡散モデル・フローによる方策"
+  aim = "Diffusion Policy 以降、行動を生成モデルで出す考え方"
+  query = '("diffusion policy" | "diffusion policies" | "flow matching policy") + (robot | robotic | manipulation | visuomotor)'
+  year = "2020-"
+
+  [[track.step]]
+  key = "data-scaling"
+  label = "ロボットデータのスケーリング"
+  aim = "Open X-Embodiment など、ロボットのデータをどう増やすか"
+  query = '("cross-embodiment" | "open x-embodiment" | "robot dataset" | "large-scale robot learning" | "scaling robot")'
+  year = "2020-"
+
+  [[track.step]]
+  key = "legged-rl"
+  label = "強化学習とsim-to-realによる脚ロボット"
+  aim = "シミュレーションで学んだ歩き方を実機に移す"
+  query = '(legged | quadruped | locomotion) + ("reinforcement learning" | "sim-to-real")'
+  year = "2020-"
+
+  [[track.step]]
+  key = "humanoid"
+  label = "ヒューマノイド"
+  aim = "全身制御・テレオペ・学習で、ヒューマノイドが急に動き出した理由"
+  query = 'humanoid + (robot | locomotion | "whole-body" | manipulation | teleoperation)'
+  year = "2020-"
+
+  [[track.step]]
+  key = "world-models"
+  label = "世界モデルと動画生成"
+  aim = "未来を予測するモデルを、ロボットの学習や計画に使う"
+  query = '("world model" | "video prediction" | "video generation" | "video diffusion") + (robot | robotic | manipulation | embodied)'
+  year = "2020-"
+
+  [[track.step]]
+  key = "dexterous"
+  label = "多指ハンドによる器用な操作"
+  aim = "人の手のような器用さに、どこまで近づいたか"
+  query = '(dexterous | "in-hand" | "multi-fingered") + (manipulation | hand | grasping)'
+  year = "2020-"
+
+  [[track.step]]
+  key = "3d-representation"
+  label = "3D表現(NeRF・Gaussian Splatting)とロボット"
+  aim = "新しい3D表現を、ロボットの認識や操作にどう使うか"
+  query = '("neural radiance" | NeRF | "gaussian splatting" | "3D feature field") + (robot | robotic | manipulation | grasping)'
+  year = "2020-"

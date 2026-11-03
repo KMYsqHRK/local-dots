@@ -50,6 +50,7 @@ ChatGPT の dots(担当を割り当てると会話をまたいで動き続け、
 | `inbox.py` | 人への質問と回答の受信箱 |
 | `scheduler.py` | 期限判定と `tick`(多重起動防止のロック付き) |
 | `cli.py` | `list` / `status` / `run` / `tick` / `watch` / `inbox` / `answer` / `new` |
+| `mail.py` | 自分宛てのメール(SMTP over SSL)。設定は環境変数。Markdown を簡単な HTML にもして送る |
 
 ## dot の定義
 
@@ -68,6 +69,7 @@ enabled = true
 every = "1h"                 # 間隔(s / m / h / d)。at と併用しない
 # at = "02:00"               # 毎日この時刻以降に1回
 window = ["00:00", "06:00"]  # この時間帯だけ動く(任意。日付をまたいでもよい)
+# days = "weekdays"          # 動かす曜日(任意)。["mon", "wed"] のようにも書ける
 # manual = true              # 自動では動かさない(run でのみ実行)
 
 [agent]
@@ -76,6 +78,9 @@ instructions_file = "instructions.md"
 # temperature = 0.2          # 全体設定を上書き
 # history_window = 2         # 直近この回数分のやりとりだけを渡す(1件ずつ独立した仕事向け)
 # max_observation_chars = 2000  # ツールの結果をこの文字数で切る
+
+[settings]                   # その dot のツールが ctx.dot.settings で読む自由な設定(出力先など)
+# report_dir = 'C:\path\to\folder'
 ```
 
 ### 速さについて(Strata + RTX 3050 での実測)
@@ -139,7 +144,7 @@ state/
 3. 人が `python -m localdots answer <id> "回答"` で答える。
 4. 次の `tick` で dot がすぐ期限扱いになり、回答を最初の OBSERVATION として受け取って続きから動く。
 
-通知(トースト、Slack など)は今は無い。`inbox` コマンドで確認する。
+質問の通知は今は無い。`inbox` コマンドで確認する。成果物をメールで届けたい dot は、ツールの中から `localdots.mail.send_markdown` を呼ぶ(robotics-digest がその例)。
 
 ## 実行タイミング
 
@@ -162,6 +167,6 @@ Strata は `%LOCALAPPDATA%` にファイルを書く。Claude デスクトップ
 ## 今後の拡張の候補
 
 - **バックエンドのプロファイル**: 難しい判断だけクラウドのモデル(Claude など)に上げる `escalate` ツール。
-- **通知**: 質問が来たときに Windows のトースト、Slack、メールで知らせる。
+- **質問の通知**: 質問が来たときに Windows のトーストやメールで知らせる(メールの部品はもうある)。
 - **コマンド実行ツール**: 許可リスト付きの `run_command`(シミュレーションの実行など)。今は dot ごとの `tools.py` に書く。
 - **dot 同士の連携**: 共有メモ(`state/shared.json`)や、ある dot が別の dot を起こすトリガー。

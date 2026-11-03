@@ -35,6 +35,7 @@ class Schedule:
     every_s: float | None = None
     at: str | None = None  # "HH:MM"
     window: tuple[str, str] | None = None  # ("HH:MM", "HH:MM")
+    days: tuple[int, ...] | None = None  # 動かす曜日(月=0 … 日=6)
     manual: bool = False
 
 
@@ -50,6 +51,7 @@ class DotConfig:
     temperature: float | None = None
     history_window: int | None = None  # 直近この回数分のやりとりだけを LLM に渡す(1件ずつ独立した仕事向け)
     max_observation_chars: int = 2000  # ツールの結果をこの文字数で切る。一覧を丸ごと読ませる dot では広げる
+    settings: dict = field(default_factory=dict)  # dot.toml の [settings]。その dot のツールが自由に使う(出力先など)
 
 
 @dataclass
@@ -58,6 +60,8 @@ class AppConfig:
     backend: BackendConfig
     dots_dir: Path
     state_dir: Path
+    # localdots.toml の [dots.<name>]。dot.toml の enabled / [schedule] / [settings] を上書きする
+    dot_overrides: dict[str, dict] = field(default_factory=dict)
 
 
 def parse_duration(text: str) -> float:
@@ -65,6 +69,16 @@ def parse_duration(text: str) -> float:
     if not m:
         raise ConfigError(f"間隔の書き方が正しくありません: {text!r}(例: 30m, 2h, 1d)")
     return float(m.group(1)) * {"s": 1, "m": 60, "h": 3600, "d": 86400}[m.group(2)]
+
+
+WEEKDAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+
+
+def parse_weekday(text: str) -> int:
+    try:
+        return WEEKDAYS.index(text.strip().lower()[:3])
+    except ValueError:
+        raise ConfigError(f"曜日は {', '.join(WEEKDAYS)} のどれかで書いてください: {text!r}") from None
 
 
 def _check_hhmm(text: str) -> str:
@@ -90,11 +104,17 @@ def load_app(root: Path) -> AppConfig:
     if unknown:
         raise ConfigError(f"[backend] に知らない項目があります: {', '.join(sorted(unknown))}")
     paths = raw.get("paths", {})
+    overrides = raw.get("dots", {})
+    for name, o in overrides.items():
+        unknown = set(o) - {"enabled", "schedule", "settings"}
+        if unknown:
+            raise ConfigError(f"[dots.{name}] で上書きできるのは enabled / schedule / settings だけです: {', '.join(sorted(unknown))}")
     return AppConfig(
         root=root,
         backend=BackendConfig(**b),
         dots_dir=root / paths.get("dots_dir", "dots"),
         state_dir=root / paths.get("state_dir", "state"),
+        dot_overrides=overrides,
     )
 
 
@@ -111,14 +131,41 @@ def _parse_schedule(raw: dict, where: str) -> Schedule:
         if not (isinstance(w, list) and len(w) == 2):
             raise ConfigError(f'{where}: window は ["HH:MM", "HH:MM"] で書いてください')
         s.window = (_check_hhmm(w[0]), _check_hhmm(w[1]))
+    if "days" in raw:
+        days = raw["days"]
+        if days == "weekdays":
+            days = WEEKDAYS[:5]
+        if not isinstance(days, list) or not days:
+            raise ConfigError(f'{where}: days は ["mon", "tue", ...] か "weekdays" で書いてください')
+        s.days = tuple(sorted({parse_weekday(d) for d in days}))
     if not s.manual and s.every_s is None and s.at is None:
         raise ConfigError(f"{where}: [schedule] に every / at / manual のどれかが必要です")
     return s
 
 
-def load_dot(path: Path) -> DotConfig:
+SCHEDULE_KINDS = ("every", "at", "manual")
+
+
+def _apply_override(raw: dict, override: dict) -> dict:
+    raw = dict(raw)
+    if "enabled" in override:
+        raw["enabled"] = override["enabled"]
+    if "schedule" in override:
+        base = dict(raw.get("schedule", {}))
+        if any(k in override["schedule"] for k in SCHEDULE_KINDS):  # 種類を変えるときは元の種類を消す
+            for k in SCHEDULE_KINDS:
+                base.pop(k, None)
+        raw["schedule"] = {**base, **override["schedule"]}
+    if "settings" in override:
+        raw["settings"] = {**raw.get("settings", {}), **override["settings"]}
+    return raw
+
+
+def load_dot(path: Path, override: dict | None = None) -> DotConfig:
     toml_path = path / "dot.toml"
     raw = _read_toml(toml_path)
+    if override:
+        raw = _apply_override(raw, override)
     agent = raw.get("agent", {})
     instructions_file = path / agent.get("instructions_file", "instructions.md")
     instructions = instructions_file.read_text(encoding="utf-8") if instructions_file.exists() else ""
@@ -133,6 +180,7 @@ def load_dot(path: Path) -> DotConfig:
         temperature=agent.get("temperature"),
         history_window=agent.get("history_window"),
         max_observation_chars=int(agent.get("max_observation_chars", 2000)),
+        settings=raw.get("settings", {}),
     )
 
 
@@ -140,7 +188,7 @@ def load_dots(app: AppConfig) -> dict[str, DotConfig]:
     if not app.dots_dir.is_dir():
         return {}
     return {
-        p.name: load_dot(p)
+        p.name: load_dot(p, app.dot_overrides.get(p.name))
         for p in sorted(app.dots_dir.iterdir())
         if p.is_dir() and (p / "dot.toml").exists()
     }

@@ -37,6 +37,8 @@ def is_due(dot: DotConfig, status: dict, inbox: Inbox, now: datetime) -> tuple[b
     s = dot.schedule
     if s.manual:
         return False, "手動のみ"
+    if s.days is not None and now.weekday() not in s.days:
+        return False, "今日は動かない曜日"
     if not in_window(s.window, now):
         return False, f"時間帯 {s.window[0]}-{s.window[1]} の外"
     next_due = from_iso(status.get("next_due"))

@@ -1,9 +1,15 @@
-description = "robotics-trends が夜に読んだ論文から、朝のダイジェストとトレンドマップを reports/robotics に書き出す"
+description = "robotics-trends がその朝に読んだ論文から、ダイジェスト・分野別の年表・ロードマップを書き出し、メールで送る"
+
+[settings]
+# 保存先。分野ごとのフォルダー(tracks.toml の folder)に、日付と段階名のダイジェストと「年表.md」を置き、直下に「ロードマップ.md」。
+# 実際の保存先はルートの localdots.toml の [dots.robotics-digest.settings] で決める
+report_dir = "reports/robotics"
 enabled = true
 
 [schedule]
-at = "06:00"
-window = ["06:00", "12:00"]
+at = "05:00"
+days = "weekdays"
+window = ["05:00", "12:00"]
 
 [agent]
 max_steps = 6

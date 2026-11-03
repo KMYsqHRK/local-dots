@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from localdots.agent import parse_action, run_dot, trim_messages
-from localdots.config import BackendConfig, AppConfig, ConfigError, Schedule, load_dot, parse_duration
+from localdots.config import BackendConfig, AppConfig, ConfigError, Schedule, _parse_schedule, load_dot, parse_duration
 from localdots.inbox import Inbox
 from localdots.scheduler import in_window, is_due
 from localdots.state import DotState, to_iso
@@ -127,11 +127,50 @@ class ScheduleTest(TempApp):
         self.assertFalse(is_due(self.dot, {"last_run": to_iso(now - timedelta(minutes=30))}, self.inbox, now)[0])
         self.assertFalse(is_due(self.dot, {}, self.inbox, now.replace(hour=1))[0])
 
+    def test_weekdays_only(self):
+        self.dot.schedule = _parse_schedule({"at": "03:00", "days": "weekdays"}, "test")
+        self.assertEqual(self.dot.schedule.days, (0, 1, 2, 3, 4))
+        fri, sat = datetime(2026, 11, 6, 3, 30, tzinfo=JST), datetime(2026, 11, 7, 3, 30, tzinfo=JST)
+        self.assertTrue(is_due(self.dot, {}, self.inbox, fri)[0])
+        self.assertEqual(is_due(self.dot, {}, self.inbox, sat), (False, "今日は動かない曜日"))
+        with self.assertRaises(ConfigError):
+            _parse_schedule({"at": "03:00", "days": ["funday"]}, "test")
+
     def test_snooze_overrides_every(self):
         now = datetime(2026, 1, 1, 12, 0, tzinfo=JST)
         status = {"last_run": to_iso(now - timedelta(hours=5)), "next_due": to_iso(now + timedelta(minutes=5))}
         self.assertFalse(is_due(self.dot, status, self.inbox, now)[0])
         self.assertTrue(is_due(self.dot, status, self.inbox, now + timedelta(minutes=6))[0])
+
+
+class RootConfigTest(unittest.TestCase):
+    def test_dotenv(self):
+        from localdots.dotenv import parse
+
+        text = '# c\nA=1\nexport B="x y"\nC=\'q\'\nD=val # memo\n\nE=\n'
+        self.assertEqual(parse(text), {"A": "1", "B": "x y", "C": "q", "D": "val", "E": ""})
+        with self.assertRaises(ValueError):
+            parse("not a line")
+
+    def test_dot_overrides(self):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            shutil.copytree(REPO / "dots" / "param-sweep-demo", tmp / "dots" / "param-sweep-demo")
+            (tmp / "localdots.toml").write_text(
+                '[dots.param-sweep-demo]\nenabled = true\n'
+                '[dots.param-sweep-demo.schedule]\nat = "02:00"\n'
+                '[dots.param-sweep-demo.settings]\nreport_dir = "x"\n', encoding="utf-8")
+            from localdots.config import load_app, load_dots
+
+            dot = load_dots(load_app(tmp))["param-sweep-demo"]
+            self.assertTrue(dot.enabled)
+            self.assertEqual((dot.schedule.at, dot.schedule.every_s), ("02:00", None))  # every は at に置き換わる
+            self.assertEqual(dot.settings, {"report_dir": "x"})
+            (tmp / "localdots.toml").write_text('[dots.param-sweep-demo]\nmax_steps = 3\n', encoding="utf-8")
+            with self.assertRaises(ConfigError):
+                load_app(tmp)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
 
 
 class RunDotTest(TempApp):
