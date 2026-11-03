@@ -1,0 +1,12 @@
+description = "2変数の目的関数を、少ない評価回数で最小化するパラメータスタディのサンプル"
+enabled = true
+
+[schedule]
+every = "30m"
+# 夜間だけ回したいときの例:
+# window = ["01:00", "06:00"]
+
+[agent]
+max_steps = 10
+instructions_file = "instructions.md"
+temperature = 0.4

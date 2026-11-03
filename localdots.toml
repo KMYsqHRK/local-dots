@@ -1,0 +1,28 @@
+# local-dots の全体設定
+
+[backend]
+# OpenAI 互換サーバーの場所。Strata の初期値は 127.0.0.1:8080
+base_url = "http://127.0.0.1:8080/v1"
+model = ""                # 空ならサーバーの先頭のモデル
+
+# true なら、サーバーが止まっていれば start_cmd で起動し、終わったら stop_cmd で止める。
+# もともと動いていたサーバーは止めない。
+manage = true
+# RTX 3050 8GB / RAM 32GB で動いた設定(MMQ の作業バッファを使わない、MTP なし、8K)
+start_cmd = [
+  "strata", "launch", "--family", "qwen36", "--model", "ud-q4_k_xl",
+  "--context", "8k", "--parallel", "1", "--mtp", "off", "--vision", "off",
+  "--access", "local", "--port", "8080", "--set", "STRATA_Q36_NO_MMQ=1",
+  "--yes", "--no-tui",
+]
+stop_cmd = ["strata", "launch", "--stop"]
+startup_timeout_s = 600
+
+temperature = 0.3
+max_tokens = 1024
+context_tokens = 8192     # サーバーの --context と合わせる
+thinking = false          # Qwen の思考モード。16K 以上なら true も試す価値あり
+
+[paths]
+dots_dir = "dots"
+state_dir = "state"
