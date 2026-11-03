@@ -14,7 +14,6 @@ from .llm import ChatModel, LLMError
 from .state import DotState, now_local, to_iso
 from .tools import Control, Tool, ToolArgError, ToolContext, load_dot_tools
 
-MAX_OBSERVATION_CHARS = 2000
 MAX_BAD_REPLIES = 3
 CHARS_PER_TOKEN = 1.5  # 日本語で実測 1.8 字/トークン。少し安全側に見積もる
 
@@ -72,10 +71,17 @@ def _estimate_tokens(messages: list[dict[str, str]]) -> int:
     return int(sum(len(m["content"]) for m in messages) / CHARS_PER_TOKEN) + 8 * len(messages)
 
 
-def trim_messages(messages: list[dict[str, str]], budget_tokens: int) -> list[dict[str, str]]:
-    """system と最初の指示は残し、収まるまで古いやりとり(assistant と OBSERVATION の組)から省く。"""
+def trim_messages(messages: list[dict[str, str]], budget_tokens: int, window: int | None = None) -> list[dict[str, str]]:
+    """system と最初の指示は残し、収まるまで古いやりとり(assistant と OBSERVATION の組)から省く。
+
+    window を指定すると、直近 window 組だけを残す。プロンプトが短いほど読み込みが速い
+    (Strata は毎回プロンプトを最初から読み直すので、7,000 トークンで約1分かかる)。
+    """
     head, rest = messages[:2], messages[2:]
     dropped = False
+    if window is not None and len(rest) > 2 * window:
+        rest = rest[len(rest) - 2 * window:]
+        dropped = True
     while rest and _estimate_tokens(head + rest) > budget_tokens:
         rest = rest[2:]
         dropped = True
@@ -93,10 +99,10 @@ def _render_notes(state: DotState) -> str:
     return "\n".join(f"- {n['text']}" for n in notes) if notes else "(まだありません)"
 
 
-def _observation(value: Any, steps_left: int) -> str:
+def _observation(value: Any, steps_left: int, max_chars: int) -> str:
     text = json.dumps(value, ensure_ascii=False, default=str)
-    if len(text) > MAX_OBSERVATION_CHARS:
-        text = text[:MAX_OBSERVATION_CHARS] + "…(省略)"
+    if len(text) > max_chars:
+        text = text[:max_chars] + "…(省略)"
     # 小さいモデルは指示の中の回数を数えないので、残りを毎回はっきり伝える
     if steps_left <= 1:
         hint = "次が最後の行動です。必ず finish を呼んで、今回やったことと次回の方針を summary に書いてください。"
@@ -131,7 +137,7 @@ def run_dot(
         answer_text = f"前回の質問「{q['question']}」への人の回答: {q['answer']}"
 
     tools = {**BUILTIN_TOOLS, **load_dot_tools(dot.path)}
-    ctx = ToolContext(dot=dot, state=state, inbox=inbox, now=now)
+    ctx = ToolContext(dot=dot, state=state, inbox=inbox, now=now, app=app)
     run_log = state.open_run_log(now)
 
     system = SYSTEM_TEMPLATE.format(
@@ -156,7 +162,7 @@ def run_dot(
     try:
         for step in range(1, dot.max_steps + 1):
             result.steps = step
-            reply = model.chat(trim_messages(messages, budget), temperature=dot.temperature)
+            reply = model.chat(trim_messages(messages, budget, dot.history_window), temperature=dot.temperature)
             run_log.write("reply", step=step, text=reply)
             messages.append({"role": "assistant", "content": reply})
 
@@ -188,13 +194,13 @@ def run_dot(
                     break
                 obs = value
             run_log.write("observation", step=step, value=obs)
-            messages.append({"role": "user", "content": _observation(obs, dot.max_steps - step)})
+            messages.append({"role": "user", "content": _observation(obs, dot.max_steps - step, dot.max_observation_chars)})
             if bad_replies >= MAX_BAD_REPLIES:
                 raise LLMError(f"ツールの呼び方の誤りが {MAX_BAD_REPLIES} 回続きました")
         else:
             # 上限まで finish しなかった: 要約だけはもらって次回に引き継ぐ
             messages.append({"role": "user", "content": WRAP_UP_PROMPT})
-            reply = model.chat(trim_messages(messages, budget), temperature=dot.temperature)
+            reply = model.chat(trim_messages(messages, budget, dot.history_window), temperature=dot.temperature)
             run_log.write("reply", step="wrap_up", text=reply)
             action = parse_action(reply)
             if action and action["tool"] == "finish" and isinstance(action["args"].get("summary"), str):

@@ -1,0 +1,13 @@
+description = "robotics-trends が夜に読んだ論文から、朝のダイジェストとトレンドマップを reports/robotics に書き出す"
+enabled = true
+
+[schedule]
+at = "06:00"
+window = ["06:00", "12:00"]
+
+[agent]
+max_steps = 6
+# tonight の一覧(25本で約6,000字)を切らずに渡す
+max_observation_chars = 9000
+instructions_file = "instructions.md"
+temperature = 0.3

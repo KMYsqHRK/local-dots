@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable
 
 if TYPE_CHECKING:
-    from .config import DotConfig
+    from .config import AppConfig, DotConfig
     from .inbox import Inbox
     from .state import DotState
 
@@ -52,6 +52,7 @@ class ToolContext:
     state: DotState
     inbox: Inbox
     now: datetime
+    app: AppConfig | None = None  # 他の dot の状態や、レポートの置き場所(app.root)を知りたいとき
     run: dict[str, Any] = field(default_factory=dict)  # この実行の間だけ使うメモ(1回あたりの上限の数え上げなど)
 
 

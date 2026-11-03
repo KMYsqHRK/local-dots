@@ -48,6 +48,8 @@ class DotConfig:
     instructions: str = ""
     max_steps: int = 12
     temperature: float | None = None
+    history_window: int | None = None  # 直近この回数分のやりとりだけを LLM に渡す(1件ずつ独立した仕事向け)
+    max_observation_chars: int = 2000  # ツールの結果をこの文字数で切る。一覧を丸ごと読ませる dot では広げる
 
 
 @dataclass
@@ -129,6 +131,8 @@ def load_dot(path: Path) -> DotConfig:
         instructions=instructions.strip(),
         max_steps=int(agent.get("max_steps", 12)),
         temperature=agent.get("temperature"),
+        history_window=agent.get("history_window"),
+        max_observation_chars=int(agent.get("max_observation_chars", 2000)),
     )
 
 

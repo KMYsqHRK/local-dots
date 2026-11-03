@@ -84,6 +84,17 @@ def evaluate(ctx, x: float, y: float) -> dict:
 2変数の目的関数を、30回の評価で最小化するパラメータスタディです。1回の実行で最大4点を評価し、結果と気づきを残して終わります。
 本番で使うときは `tools.py` の `evaluate` を、シミュレーションの実行と結果の読み取りに置き換えます。
 
+## 担当: `robotics-trends` と `robotics-digest`
+
+2020年代のロボティクスの流れを、一晩に1テーマずつ読み進める2つの担当です。朝には `reports/robotics/` に読み物ができています。
+
+- **robotics-trends**(01:00〜): `topics.toml` の順番で、今夜のテーマを1つ選びます。Semantic Scholar から2020年以降の論文を被引用数の多い順に20本、ここ1〜2年の注目論文を5本、arXiv の cs.RO 新着を5本取ってきて、1本ずつアブストラクトを読ませ、要約・テーマ・新しさ・重要度を記録します。30本で20分ほどです。
+- **robotics-digest**(06:00〜): 今夜の記録から、テーマの流れの解説を書かせます。そのうえで次の2つを書き出します。
+  - `digest-YYYY-MM-DD.md`: 今日の3本、テーマの流れ、年順の一覧、新着
+  - `trend-map.md`: これまでの全記録を、テーマ別・年順にまとめたもの
+
+テーマの順番と検索クエリは `dots/robotics-trends/topics.toml` で変えられます。Semantic Scholar は、キーなしだと回数制限(429)によくかかります。待ってやり直す処理は入れてありますが、[API キー](https://www.semanticscholar.org/product/api#api-key-form)を環境変数 `S2_API_KEY` に入れておくと安定します。
+
 ## 設定
 
 `localdots.toml` でサーバーの場所、起動・停止コマンド、コンテキスト長などを設定します。

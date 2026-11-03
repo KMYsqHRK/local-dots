@@ -1,0 +1,63 @@
+# 2020年代のロボティクスを、一晩に1テーマずつ読んでいく順番。
+# query は Semantic Scholar の bulk search の書き方(| は OR、+ は AND、"..." は語句)。
+# robotics-digest もこのファイルを読んで、トレンドマップの章立てに使う。
+
+[[topic]]
+key = "llm-planning"
+label = "LLMによるタスク計画"
+query = '("large language model" | "language model" | LLM) + (robot | robotic | embodied) + (planning | planner | "code as policies")'
+
+[[topic]]
+key = "vla"
+label = "VLA・ロボット基盤モデル"
+query = '("vision-language-action" | "robot foundation model" | "generalist robot policy" | "robotics transformer")'
+
+[[topic]]
+key = "imitation-teleop"
+label = "模倣学習とテレオペによるデータ収集"
+query = '("imitation learning" | "behavior cloning" | teleoperation) + (robot | robotic | manipulation | bimanual)'
+
+[[topic]]
+key = "diffusion-policy"
+label = "拡散モデル・フローによる方策"
+query = '("diffusion policy" | "diffusion policies" | "flow matching policy") + (robot | robotic | manipulation | visuomotor)'
+
+[[topic]]
+key = "data-scaling"
+label = "ロボットデータのスケーリングとクロスエンボディメント"
+query = '("cross-embodiment" | "open x-embodiment" | "robot dataset" | "large-scale robot learning" | "scaling robot")'
+
+[[topic]]
+key = "legged-rl"
+label = "強化学習とsim-to-realによる脚ロボット"
+query = '(legged | quadruped | locomotion) + ("reinforcement learning" | "sim-to-real")'
+
+[[topic]]
+key = "humanoid"
+label = "ヒューマノイド"
+query = 'humanoid + (robot | locomotion | "whole-body" | manipulation | teleoperation)'
+
+[[topic]]
+key = "world-models"
+label = "世界モデルと動画生成のロボットへの応用"
+query = '("world model" | "video prediction" | "video generation" | "video diffusion") + (robot | robotic | manipulation | embodied)'
+
+[[topic]]
+key = "dexterous"
+label = "多指ハンドによる器用な操作"
+query = '(dexterous | "in-hand" | "multi-fingered") + (manipulation | hand | grasping)'
+
+[[topic]]
+key = "3d-representation"
+label = "3D表現(NeRF・Gaussian Splatting)とロボット"
+query = '("neural radiance" | NeRF | "gaussian splatting" | "3D representation" | "3D feature field") + (robot | robotic | manipulation | grasping)'
+
+[[topic]]
+key = "navigation"
+label = "視覚と言語によるナビゲーション"
+query = '("vision-and-language navigation" | "embodied navigation" | "object goal navigation" | "visual navigation") + (robot | embodied | agent)'
+
+[[topic]]
+key = "sim-benchmarks"
+label = "シミュレーターとベンチマーク"
+query = '(simulator | simulation | benchmark) + (robot | robotic | manipulation) + ("GPU" | "large-scale" | "domain randomization" | "sim-to-real")'

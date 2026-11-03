@@ -72,6 +72,14 @@ class TrimTest(unittest.TestCase):
         self.assertEqual(out[-1], msgs[-1])
         self.assertLess(len(out), len(msgs))
 
+    def test_window_keeps_only_recent_pairs(self):
+        msgs = [{"role": "system", "content": "s"}, {"role": "user", "content": "k"}]
+        for i in range(5):
+            msgs += [{"role": "assistant", "content": f"a{i}"}, {"role": "user", "content": f"o{i}"}]
+        out = trim_messages(msgs, 100_000, window=2)
+        self.assertEqual([m["content"] for m in out[3:]], ["a3", "o3", "a4", "o4"])
+        self.assertEqual(len(trim_messages(msgs[:4], 100_000, window=2)), 4)  # 窓に収まっていれば何もしない
+
 
 class ToolTest(unittest.TestCase):
     def test_signature_and_conversion(self):

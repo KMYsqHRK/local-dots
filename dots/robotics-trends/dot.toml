@@ -1,0 +1,14 @@
+description = "2020年代のロボティクス論文を、一晩に1テーマずつ集めて読み、要約とテーマ分けを記録する"
+enabled = true
+
+[schedule]
+at = "01:00"
+window = ["01:00", "05:30"]  # 昼間にタスクを登録しても、その日の夜まで動かない
+
+[agent]
+# record_paper が次の論文も返すので、1本につき LLM の呼び出しは1回。今夜の分(最大30本)を1回の実行で読み切る
+max_steps = 45
+# 論文どうしは独立しているので、直近のやりとりだけを渡してプロンプトを短く保つ
+history_window = 2
+instructions_file = "instructions.md"
+temperature = 0.2
