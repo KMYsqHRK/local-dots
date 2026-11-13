@@ -254,10 +254,13 @@ def _today_context(d: dict, label: str, whole_track: bool = False) -> str:
     if s is None:
         return ""
     track = next(t for t in load_tracks() if t["key"] == s["track"])
+    day = date.fromisoformat(label)
+    # 日付と曜日もここで渡す(LLM が自分で曜日を数えると間違える)。これは論文の分類ではなく今日の担当
+    head = f"今日({label} {'月火水木金土日'[day.weekday()]}曜)の担当: {track['label']}"
     if whole_track:
-        return f"{track['label']}(分野全体の新着。今日の段階に限らず、この分野の論文なら記録する)"
+        return f"{head}(分野全体の新着。この分野の論文なら記録する)"
     step = next(x for x in track["step"] if x["key"] == s["step"])
-    return f"{track['label']} / {step['label']}(ねらい: {step['aim']})"
+    return f"{head} / {step['label']}(ねらい: {step['aim']})。この論文は今日の担当のために選ばれたもの"
 
 
 def _done(ctx, d: dict) -> dict:
@@ -274,7 +277,7 @@ def _done(ctx, d: dict) -> dict:
     skipped = sum(1 for p in today if p.get("skipped"))
     return {
         "done_for_today": True,
-        "message": f"今日の分はすべて読み終えました(記録 {recorded} 本、スキップ {skipped} 本)。この本数を summary に書いて finish してください",
+        "message": f"今日の分はすべて読み終えました(記録 {recorded} 本、スキップ {skipped} 本)。この本数を summary に書いて finish してください。次回の分野はコードが決めるので、summary には書かないでください",
     }
 
 
